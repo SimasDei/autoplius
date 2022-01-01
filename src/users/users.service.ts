@@ -27,7 +27,7 @@ export class UsersService {
     const users = await this.repo.find({ email });
 
     if (!users.length) {
-      throw new NotFoundException('User not found');
+      return null;
     }
 
     return users;
