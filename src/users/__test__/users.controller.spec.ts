@@ -52,4 +52,32 @@ describe('Users Controller', () => {
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
+
+  it('findAllUsers should return list of users with the given email', async () => {
+    const users = await controller.findAllUsers(mockUser.email);
+
+    expect(users).toEqual([mockUser]);
+  });
+
+  it('findAllUsers should return empty if no users were found with the given email', async () => {
+    userServiceMock.find = jest.fn().mockResolvedValue([]);
+
+    const users = await controller.findAllUsers(mockUser.email);
+
+    expect(users).toEqual([]);
+  });
+
+  it('findOneUser should return user with the given id', async () => {
+    const user = await controller.findUser(mockUser.id.toString());
+
+    expect(user).toEqual(mockUser);
+  });
+
+  it('findOneUser should return empty if no user was found with the given id', async () => {
+    userServiceMock.findOne = jest.fn().mockResolvedValue(null);
+
+    const user = await controller.findUser(mockUser.id.toString());
+
+    expect(user).toEqual(null);
+  });
 });
