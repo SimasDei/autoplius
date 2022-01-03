@@ -4,6 +4,7 @@ import { UsersController } from '../users.controller';
 import { UsersService } from '../users.service';
 import { AuthService } from '../auth.service';
 import { User } from '../user.entity';
+import { NotFoundException } from '@nestjs/common';
 
 let controller: UsersController;
 let userServiceMock: Partial<UsersService>;
@@ -74,10 +75,50 @@ describe('Users Controller', () => {
   });
 
   it('findOneUser should return empty if no user was found with the given id', async () => {
-    userServiceMock.findOne = jest.fn().mockResolvedValue(null);
+    try {
+      await controller.findUser('2');
+    } catch (error) {
+      expect(error).toBeInstanceOf(NotFoundException);
+      expect(error.message).toEqual('User not found');
+    }
+  });
 
-    const user = await controller.findUser(mockUser.id.toString());
+  it('signIn should generate auth cookie and return user', async () => {
+    const sessionMock = {};
+    const user = await controller.signIn(
+      { email: mockUser.email, password: mockUser.password },
+      sessionMock,
+    );
 
-    expect(user).toEqual(null);
+    expect(user).toEqual(mockUser);
+    expect(sessionMock).toEqual({
+      userId: mockUser.id,
+    });
+  });
+
+  it('signIn should not generate session and return user if incorrect params were provided', async () => {
+    const sessionMock = {};
+    authServiceMock.signIn = jest
+      .fn()
+      .mockRejectedValue(new NotFoundException('User not found'));
+
+    try {
+      await controller.signIn({ email: '', password: '' }, sessionMock);
+    } catch (error) {
+      expect(error).toBeInstanceOf(NotFoundException);
+      expect(sessionMock).toEqual({});
+    }
+  });
+
+  it('signOut should remove user from session', () => {
+    const sessionMock = {
+      userId: mockUser.id,
+    };
+
+    controller.signOut(sessionMock);
+
+    expect(sessionMock).toEqual({
+      userId: null,
+    });
   });
 });
