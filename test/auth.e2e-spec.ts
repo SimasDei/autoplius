@@ -4,7 +4,7 @@ import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 
 const mockUser = {
-  email: 'test@test.com',
+  email: 'test1@test.com',
   password: 'test',
 };
 
