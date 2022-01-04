@@ -121,4 +121,57 @@ describe('Users Controller', () => {
       userId: null,
     });
   });
+
+  it('whoAmI should return user object from session if user is logged in', () => {
+    const user = controller.whoAmI(mockUser);
+
+    expect(user).toEqual(mockUser);
+  });
+
+  it('createUser should create a user if correct data is provided', async () => {
+    const mockSession = {};
+    authServiceMock.signUp = jest.fn().mockResolvedValue(mockUser);
+    userServiceMock.create = jest.fn().mockResolvedValue(mockUser);
+
+    const user = await controller.createUser(mockUser, mockSession);
+
+    expect(user).toEqual(mockUser);
+
+    expect(authServiceMock.signUp).toHaveBeenCalledWith(
+      mockUser.email,
+      mockUser.password,
+    );
+    expect(mockSession).toStrictEqual({
+      userId: mockUser.id,
+    });
+  });
+
+  it('deleteUser should take id parameter and delete user with the specified id', async () => {
+    userServiceMock.findOne = jest.fn().mockResolvedValue([mockUser]);
+
+    await controller.deleteUser(mockUser.id.toString());
+
+    const users = await controller.findAllUsers(mockUser.email);
+
+    const user = users.find((user) => user.id === mockUser.id);
+
+    expect(user).toBeUndefined();
+  });
+
+  it('updateUser should take param data and create a new user', async () => {
+    const updateUser = {
+      id: 1,
+      email: 'test2@test.com',
+      password: 'test',
+    };
+
+    userServiceMock.update = jest.fn().mockResolvedValue(updateUser);
+
+    const user = await controller.updateUser(updateUser.id.toString(), {
+      email: updateUser.email,
+      password: updateUser.password,
+    });
+
+    expect(user).toEqual(updateUser);
+  });
 });

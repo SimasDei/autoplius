@@ -65,6 +65,25 @@ describe('Auth service test suite', () => {
       password: 'test',
     } as User;
 
+    usersServiceMock.find = jest.fn().mockResolvedValue([mockUser]);
+
+    try {
+      await service.signUp(mockUser.email, mockUser.password);
+    } catch (error) {
+      expect(error).toBeInstanceOf(BadRequestException);
+      expect(error.message).toEqual('User already exists');
+    }
+  });
+
+  it('should throw if userService returns undefined user somehow', async () => {
+    const mockUser = {
+      id: 1,
+      email: 'test1@test.com',
+      password: 'test',
+    } as User;
+
+    usersServiceMock.find = jest.fn().mockResolvedValue(undefined);
+
     try {
       await service.signUp(mockUser.email, mockUser.password);
     } catch (error) {
