@@ -30,4 +30,21 @@ describe('Authentication (e2e)', () => {
     expect(res.body.id).toBeDefined();
     expect(res.body.password).not.toEqual(mockUser.password);
   });
+
+  it('should handle sign in request', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/auth/signup')
+      .send(mockUser)
+      .expect(201);
+
+    const { id, email } = res.body;
+
+    const whoAmIRes = await request(app.getHttpServer())
+      .get('/auth/whoami')
+      .set('Cookie', res.get('Set-Cookie'))
+      .expect(200);
+
+    expect(whoAmIRes.body.email).toBe(email);
+    expect(whoAmIRes.body.id).toBe(id);
+  });
 });
