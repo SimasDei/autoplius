@@ -11,10 +11,6 @@ export class ReportsController {
   @UseGuards(AuthGuard)
   @Post()
   createReport(@Body() body: CreateReportDto) {
-    console.log(
-      '🚀 ~ file: reports.controller.ts ~ line 14 ~ ReportsController ~ createReport ~ body',
-      body,
-    );
-    return 'crrateReport';
+    return this.reportsService.create(body);
   }
 }
